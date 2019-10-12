@@ -1,0 +1,102 @@
+<script>
+	V={
+		s: function(a, b)
+		{
+			return [a[0]+b[0], a[1]+b[1], a[2]+b[2]];
+		},	
+
+		d: function(a, b)
+		{
+			return [a[0]-b[0], a[1]-b[1], a[2]-b[2]];
+		},
+		
+		p: function(a, b)
+		{
+			return [a[0]*b[0], a[1]*b[1], a[2]*b[2]];
+		},
+		
+		ps: function(k, a)
+		{
+			return [k*a[0], k*a[1], k*a[2]];
+		},
+		
+		pv: function(a, b)
+		{
+			return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
+		},
+		
+		o: function(a)
+		{
+			return [-a[0], -a[1], -a[2]];
+		},
+		
+		abs: function(a)
+		{
+			return Math.sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);
+		},
+		
+		norm: function(a)
+		{
+			var abs=V.abs(a);
+			if(abs==0) return [0, 0, 0];
+			return V.ps(1/abs, a);
+		}
+	}
+	
+	function hit(v, w, r, m, I, u, n, kf, kr)
+	{
+		var v_n=V.p(v, n);
+		var v_t=V.d(v, v_n);
+		
+		var u_n=V.p(u, n);
+		var u_t=V.d(u, u_n);
+		
+		var v_n_=V.d(V.ps(1+kr, u_n), v_n);
+		
+		var DP=kf*m*V.abs(V.d(v_n_, v_n));
+		
+		var res=hit_(v_t, w, r, m, I, u_t, DP, DP/100);
+		
+		var v_t_=res.v;
+		var w_=res.w;
+		
+		var v_=V.s(v_n_, v_t_);
+		
+		return {v: v_, w: w_};
+	}
+	
+	function hit_(v, w, r, m, I, u, n, DP, dP)
+	{
+		while(DP>0)
+		{
+			var F_norm=V.norm(
+				V.s
+				(
+					V.d(u, v), 
+					V.pv(
+						V.ps(-r, n),
+						w
+					)
+				)
+			);
+			var dv=V.ps(dP/m, F_norm);
+			var dw=V.ps(dP/I, V.pv(V.ps(r, F_norm), n));
+			v=V.s(v, dv);
+			w=V.s(w, dw);
+			DP-=dP;
+		}
+		return {v: v, w: w};
+	}
+	
+	v=[0, 0, 0];
+	w=[0, 0, 1];
+	u=[0, 0, 0];
+	n=[-1, 0, 0];
+	
+	r=1;
+	m=1;
+	I=10;
+	
+	DP=10;
+	dP=0.1;
+</script>
